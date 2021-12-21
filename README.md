@@ -15,3 +15,8 @@ python3 rofi-zotero.py -z [zotero_path]
 ```
 
 where `[zotero_path]` points to the path of your zotero folder (typically `~/Zotero/`).
+
+
+## Example
+
+[](rofi-zotero.gif)
