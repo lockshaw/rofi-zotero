@@ -11,6 +11,14 @@ DEF_ZOTERO_DIR      = os.path.join(HOME_DIR, "Zotero")
 ZOTERO_STORAGE_DIR  = "storage"
 ZOTERO_SQLITE_FILE  = "zotero.sqlite"
 
+rofi_theme = ""
+
+if rofi_theme:
+  theming = ["-theme", rofi_theme]
+else:
+  theming = []
+
+
 PDFS_QUERY = """ 
     SELECT attachmentInfo.key,  
            parentItemDataValues.value 
@@ -85,7 +93,7 @@ if args.list:
   print(pdfs_str)
 
 else:
-  rofi = subprocess.run(["rofi", "-threads", "0", "-dmenu", "-i", "-p", "paper"], \
+  rofi = subprocess.run(["rofi", "-threads", "0", "-dmenu", "-i", "-p", "paper"] + theming, \
       capture_output=True, text=True, input=pdfs_str)
   selected_pdf = rofi.stdout.strip()
   print(selected_pdf)
