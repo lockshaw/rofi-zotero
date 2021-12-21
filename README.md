@@ -19,4 +19,4 @@ where `[zotero_path]` points to the path of your zotero folder (typically `~/Zot
 
 ## Example
 
-[](rofi-zotero.gif)
+![](rofi-zotero.gif)
