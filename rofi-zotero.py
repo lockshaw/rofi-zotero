@@ -76,9 +76,10 @@ parser.add_argument( \
 args = parser.parse_args()
 pdfs = getPDFSet(args.zotero)
 pdfs_str = ""
+labels = list(range(len(pdfs)))
 
-for pdf in pdfs:
-  pdfs_str += "({}) {}\n".format(pdf[0], pdf[1])
+for i, pdf in enumerate(pdfs):
+  pdfs_str += "({}) {}\n".format(labels[i], pdf[1])
 
 if args.list:
   print(pdfs_str)
@@ -87,11 +88,12 @@ else:
   rofi = subprocess.run(["rofi", "-threads", "0", "-dmenu", "-i", "-p", "paper"], \
       capture_output=True, text=True, input=pdfs_str)
   selected_pdf = rofi.stdout.strip()
-
+  print(selected_pdf)
   if len(selected_pdf) > 0:
-    re_result = re.match(r"\((?P<key>\w+)\)", selected_pdf)
+    re_result = re.match(r"\((?P<index>\w+)\)", selected_pdf)
     if re_result is not None:
-      key = re_result.group("key")
+      index = re_result.group("index")
+      key = pdfs[int(index)][0]
       storage_dir = os.path.join(args.zotero, ZOTERO_STORAGE_DIR, key)
       file_to_open = pick_file(os.listdir(storage_dir))
       file_to_open_path = os.path.join(storage_dir, file_to_open)
