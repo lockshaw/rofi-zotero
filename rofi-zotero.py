@@ -5,6 +5,7 @@ import os
 import re
 import sqlite3
 import subprocess
+import shutil
 
 HOME_DIR            = os.environ.get("HOME") 
 DEF_ZOTERO_DIR      = os.path.join(HOME_DIR, "Zotero")
@@ -12,6 +13,8 @@ ZOTERO_STORAGE_DIR  = "storage"
 ZOTERO_SQLITE_FILE  = "zotero.sqlite"
 
 rofi_theme = ""
+
+
 
 
 # Query for getting the Authors
@@ -72,7 +75,7 @@ q_dates = """
 """
 
 def getPDFSet(zotero_dir, PDFS_QUERY):
-  conn = sqlite3.connect(os.path.join(zotero_dir, ZOTERO_SQLITE_FILE))
+  conn = sqlite3.connect(target)
 
   pdfs = conn.execute(PDFS_QUERY)
   seen_pdfs = set()
@@ -126,6 +129,11 @@ if args.theme:
 else:
   theming = []
 
+# make a copy of zotero database so it is available with zotero open
+original = os.path.join(args.zotero, ZOTERO_SQLITE_FILE)
+target = os.path.join("/tmp/", ZOTERO_SQLITE_FILE)
+
+shutil.copyfile(original, target)
 
 a_authors = getPDFSet(args.zotero, q_authors)
 a_titles = getPDFSet(args.zotero, q_titles)
