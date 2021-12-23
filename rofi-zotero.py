@@ -13,10 +13,6 @@ ZOTERO_SQLITE_FILE  = "zotero.sqlite"
 
 rofi_theme = ""
 
-if rofi_theme:
-  theming = ["-theme", rofi_theme]
-else:
-  theming = []
 
 # Query for getting the Authors
 q_authors = """
@@ -114,11 +110,21 @@ parser.add_argument( \
     action="store", 
     default=DEF_ZOTERO_DIR,
     help="set the Zotero directory")
+parser.add_argument( \
+    "-t", "--theme", \
+    action="store", 
+    default=rofi_theme,
+    help="set the Zotero directory")
 
 args = parser.parse_args()
 # pdfs = getPDFSet(args.zotero)
 pdfs_str = ""
 # labels = list(range(len(pdfs)))
+
+if args.theme:
+  theming = ["-theme", args.theme]
+else:
+  theming = []
 
 
 a_authors = getPDFSet(args.zotero, q_authors)

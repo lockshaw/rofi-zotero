@@ -11,10 +11,10 @@ SQLite database to gather the list of attachments. The attachment is opened by
 To use, run or set a keyboard shortcut to run: 
 
 ```bash
-python3 rofi-zotero.py -z [zotero_path]
+python3 rofi-zotero.py -z [zotero_path] -t [theme]
 ```
 
-where `[zotero_path]` points to the path of your zotero folder (typically `~/Zotero/`).
+where `[zotero_path]` points to the path of your zotero folder (defaults to `~/Zotero/`) and `[theme]` is the name of the rofi theme you want to use (optional, defaults to no theme).
 
 
 ## Example
