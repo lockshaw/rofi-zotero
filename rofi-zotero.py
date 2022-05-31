@@ -7,7 +7,7 @@ import sqlite3
 import subprocess
 import shutil
 
-HOME_DIR            = os.environ.get("HOME") 
+HOME_DIR            = os.environ.get("HOME")
 DEF_ZOTERO_DIR      = os.path.join(HOME_DIR, "Zotero")
 ZOTERO_STORAGE_DIR  = "storage"
 ZOTERO_SQLITE_FILE  = "zotero.sqlite"
@@ -19,9 +19,9 @@ rofi_theme = ""
 
 # Query for getting the Authors
 q_authors = """
-select 
+select
   items.itemID, creators.creatorID, creators.Lastname, itemCreators.orderIndex
-from 
+from
   (
     (creators JOIN itemCreators
     ON creators.creatorID = itemCreators.creatorID) as t1
@@ -31,23 +31,23 @@ from
 """
 
 # Query for getting the titles
-q_titles = """ 
-    SELECT parentInfo.itemID, attachmentInfo.key,  
-           parentItemDataValues.value 
-    FROM itemAttachments 
-    INNER JOIN items AS attachmentInfo 
-        ON attachmentInfo.itemID = itemAttachments.itemID 
-    INNER JOIN itemData as attachmentItemData 
-        ON attachmentItemData.itemID = attachmentInfo.itemID 
-    INNER JOIN itemDataValues as attachmentItemDataValues 
-        ON attachmentItemData.valueID = attachmentItemDataValues.valueID 
-    INNER JOIN items AS parentInfo 
-        ON itemAttachments.parentItemID = parentInfo.itemID 
-    INNER JOIN itemData as parentItemData 
-        ON parentItemData.itemID = parentInfo.itemID 
-    INNER JOIN itemDataValues as parentItemDataValues 
-        ON parentItemDataValues.valueID = parentItemData.valueID 
-    WHERE 
+q_titles = """
+    SELECT parentInfo.itemID, attachmentInfo.key,
+           parentItemDataValues.value
+    FROM itemAttachments
+    INNER JOIN items AS attachmentInfo
+        ON attachmentInfo.itemID = itemAttachments.itemID
+    INNER JOIN itemData as attachmentItemData
+        ON attachmentItemData.itemID = attachmentInfo.itemID
+    INNER JOIN itemDataValues as attachmentItemDataValues
+        ON attachmentItemData.valueID = attachmentItemDataValues.valueID
+    INNER JOIN items AS parentInfo
+        ON itemAttachments.parentItemID = parentInfo.itemID
+    INNER JOIN itemData as parentItemData
+        ON parentItemData.itemID = parentInfo.itemID
+    INNER JOIN itemDataValues as parentItemDataValues
+        ON parentItemDataValues.valueID = parentItemData.valueID
+    WHERE
     attachmentItemData.fieldID = 1 AND parentItemData.fieldID = 1
       AND (itemAttachments.contentType LIKE '%pdf%'
           OR itemAttachments.contentType LIKE '%djvu%')
@@ -55,22 +55,22 @@ q_titles = """
 
 
 # Query for getting the publishing dates
-q_dates = """ 
-    SELECT parentInfo.itemID, attachmentInfo.key,  
+q_dates = """
+    SELECT parentInfo.itemID, attachmentInfo.key,
            parentItemDataValues.value, parentItemData.fieldID
-    FROM itemAttachments 
-    INNER JOIN items AS attachmentInfo 
-        ON attachmentInfo.itemID = itemAttachments.itemID 
-    INNER JOIN itemData as attachmentItemData 
-        ON attachmentItemData.itemID = attachmentInfo.itemID 
-    INNER JOIN itemDataValues as attachmentItemDataValues 
-        ON attachmentItemData.valueID = attachmentItemDataValues.valueID 
-    INNER JOIN items AS parentInfo 
-        ON itemAttachments.parentItemID = parentInfo.itemID 
-    INNER JOIN itemData as parentItemData 
-        ON parentItemData.itemID = parentInfo.itemID 
-    INNER JOIN itemDataValues as parentItemDataValues 
-        ON parentItemDataValues.valueID = parentItemData.valueID 
+    FROM itemAttachments
+    INNER JOIN items AS attachmentInfo
+        ON attachmentInfo.itemID = itemAttachments.itemID
+    INNER JOIN itemData as attachmentItemData
+        ON attachmentItemData.itemID = attachmentInfo.itemID
+    INNER JOIN itemDataValues as attachmentItemDataValues
+        ON attachmentItemData.valueID = attachmentItemDataValues.valueID
+    INNER JOIN items AS parentInfo
+        ON itemAttachments.parentItemID = parentInfo.itemID
+    INNER JOIN itemData as parentItemData
+        ON parentItemData.itemID = parentInfo.itemID
+    INNER JOIN itemDataValues as parentItemDataValues
+        ON parentItemDataValues.valueID = parentItemData.valueID
     WHERE parentItemData.fieldID=6
 """
 
@@ -110,14 +110,20 @@ parser.add_argument( \
     help="list PDFs instead of opening one")
 parser.add_argument( \
     "-z", "--zotero", \
-    action="store", 
+    action="store",
     default=DEF_ZOTERO_DIR,
     help="set the Zotero directory")
 parser.add_argument( \
     "-t", "--theme", \
-    action="store", 
+    action="store",
     default=rofi_theme,
     help="set the Zotero directory")
+parser.add_argument(
+    "-f", "--focus-if-open",
+    action="store_true",
+    default=False,
+    help="if the file is already open, focus the window instead of opening an additional window"
+    )
 
 args = parser.parse_args()
 # pdfs = getPDFSet(args.zotero)
@@ -144,7 +150,7 @@ id = 1
 author_list = []
 for i in a_authors:
     if i[0] != id:
-        authors[id] = author_list 
+        authors[id] = author_list
         id = i[0]
         author_list = []
     author_list.append(i[2])
@@ -199,5 +205,16 @@ else:
       storage_dir = os.path.join(args.zotero, ZOTERO_STORAGE_DIR, key)
       file_to_open = pick_file(os.listdir(storage_dir))
       file_to_open_path = os.path.join(storage_dir, file_to_open)
+      if args.focus_if_open:
+        result = subprocess.run(["xdotool", "search", os.path.basename(file_to_open_path)], capture_output=True)
+        if result.returncode == 0:
+          existing = [
+              int(window_id)
+              for window_id
+              in result.stdout.decode().split()
+          ]
+          cmd = ["xdotool", "windowactivate", "--sync", str(existing[0])]
+          subprocess.Popen(cmd)
+          exit()
       subprocess.Popen(["xdg-open", file_to_open_path])
 
