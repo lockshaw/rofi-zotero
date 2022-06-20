@@ -92,7 +92,7 @@ def getPDFSet(zotero_dir, PDFS_QUERY):
 
 
 VALID_EXTENSIONS = ["pdf", "djvu"]
-INVALID_PATTERNS = ["sync-conflict"]
+INVALID_PATTERNS = ["sync-conflict", "zotero-pdf-state"]
 
 def pick_file(files):
   valid_files = [f for f in files if \
